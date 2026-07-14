@@ -16,6 +16,12 @@ import {
 import { RaceResultsCacheService } from '../race-results/race-results-cache.service';
 import { LiveTimingData } from '../race-results/interfaces/live-timing-data.interface';
 import { StreamStatus } from '../race-results/interfaces/stream-status.interface';
+import {
+  SYNC_GLOBAL_ROOM,
+  SYNC_RACE_CREATED_EVENT,
+  SYNC_RACE_UPDATED_EVENT,
+} from '../races/constants';
+import { RaceSyncPayload } from '../races/interfaces/race-sync-payload.interface';
 import { RACE_RESULTS_STREAM_ROOM } from './constants';
 
 @WebSocketGateway({
@@ -33,12 +39,13 @@ export class NetworkGateway
 
   async handleConnection(client: Socket) {
     await client.join(RACE_RESULTS_STREAM_ROOM);
+    await client.join(SYNC_GLOBAL_ROOM);
     this.logger.log(
-      `Client ${client.id} connected and joined ${RACE_RESULTS_STREAM_ROOM}`,
+      `Client ${client.id} connected and joined ${RACE_RESULTS_STREAM_ROOM}, ${SYNC_GLOBAL_ROOM}`,
     );
     client.emit('connected', {
       id: client.id,
-      room: RACE_RESULTS_STREAM_ROOM,
+      rooms: [RACE_RESULTS_STREAM_ROOM, SYNC_GLOBAL_ROOM],
     });
 
     client.emit(
@@ -66,6 +73,14 @@ export class NetworkGateway
     this.server
       .to(RACE_RESULTS_STREAM_ROOM)
       .emit(RACE_STREAM_STATUS_UPDATED_EVENT, status);
+  }
+
+  broadcastRaceCreated(payload: RaceSyncPayload) {
+    this.server.to(SYNC_GLOBAL_ROOM).emit(SYNC_RACE_CREATED_EVENT, payload);
+  }
+
+  broadcastRaceUpdated(payload: RaceSyncPayload) {
+    this.server.to(SYNC_GLOBAL_ROOM).emit(SYNC_RACE_UPDATED_EVENT, payload);
   }
 
   @SubscribeMessage('ping')
