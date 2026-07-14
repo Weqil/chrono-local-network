@@ -1,0 +1,78 @@
+import {
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
+import { Server, Socket } from 'socket.io';
+import {
+  RACE_RESULTS_UPDATED_EVENT,
+  RACE_STREAM_STATUS_UPDATED_EVENT,
+} from '../race-results/constants';
+import { RaceResultsCacheService } from '../race-results/race-results-cache.service';
+import { LiveTimingData } from '../race-results/interfaces/live-timing-data.interface';
+import { StreamStatus } from '../race-results/interfaces/stream-status.interface';
+import { RACE_RESULTS_STREAM_ROOM } from './constants';
+
+@WebSocketGateway({
+  cors: { origin: '*' },
+})
+export class NetworkGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
+  private readonly logger = new Logger(NetworkGateway.name);
+
+  constructor(private readonly raceResultsCache: RaceResultsCacheService) {}
+
+  @WebSocketServer()
+  server: Server;
+
+  async handleConnection(client: Socket) {
+    await client.join(RACE_RESULTS_STREAM_ROOM);
+    this.logger.log(
+      `Client ${client.id} connected and joined ${RACE_RESULTS_STREAM_ROOM}`,
+    );
+    client.emit('connected', {
+      id: client.id,
+      room: RACE_RESULTS_STREAM_ROOM,
+    });
+
+    client.emit(
+      RACE_STREAM_STATUS_UPDATED_EVENT,
+      this.raceResultsCache.getStreamStatus(),
+    );
+
+    const cached = this.raceResultsCache.get();
+    if (cached) {
+      client.emit(RACE_RESULTS_UPDATED_EVENT, cached.data);
+    }
+  }
+
+  handleDisconnect(client: Socket) {
+    this.logger.log(`Client disconnected: ${client.id}`);
+  }
+
+  broadcastRaceResults(payload: LiveTimingData) {
+    this.server
+      .to(RACE_RESULTS_STREAM_ROOM)
+      .emit(RACE_RESULTS_UPDATED_EVENT, payload);
+  }
+
+  broadcastStreamStatus(status: StreamStatus) {
+    this.server
+      .to(RACE_RESULTS_STREAM_ROOM)
+      .emit(RACE_STREAM_STATUS_UPDATED_EVENT, status);
+  }
+
+  @SubscribeMessage('ping')
+  handlePing(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: unknown,
+  ) {
+    return { event: 'pong', data: { clientId: client.id, payload } };
+  }
+}
