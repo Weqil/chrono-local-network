@@ -19,6 +19,7 @@ import { StreamStatus } from '../race-results/interfaces/stream-status.interface
 import {
   SYNC_GLOBAL_ROOM,
   SYNC_RACE_CREATED_EVENT,
+  SYNC_RACE_DELETED_EVENT,
   SYNC_RACE_UPDATED_EVENT,
 } from '../races/constants';
 import { RaceSyncPayload } from '../races/interfaces/race-sync-payload.interface';
@@ -81,6 +82,10 @@ export class NetworkGateway
 
   broadcastRaceUpdated(payload: RaceSyncPayload) {
     this.server.to(SYNC_GLOBAL_ROOM).emit(SYNC_RACE_UPDATED_EVENT, payload);
+  }
+
+  broadcastRaceDeleted(payload: RaceSyncPayload) {
+    this.server.to(SYNC_GLOBAL_ROOM).emit(SYNC_RACE_DELETED_EVENT, payload);
   }
 
   @SubscribeMessage('ping')

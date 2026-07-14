@@ -12,6 +12,7 @@ export class RacesPresenter {
       version: race.version,
       created_at_ms: race.createdAtMs,
       updated_at_ms: race.updatedAtMs,
+      deleted_at_ms: race.deletedAtMs ?? null,
     };
   }
 }

@@ -7,4 +7,5 @@ export interface RaceSyncPayload {
   version: number;
   created_at_ms: number;
   updated_at_ms: number;
+  deleted_at_ms: number | null;
 }

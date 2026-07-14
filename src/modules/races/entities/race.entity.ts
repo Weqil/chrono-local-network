@@ -25,4 +25,7 @@ export class RaceEntity {
 
   @Column({ name: 'updated_at_ms', type: 'integer' })
   updatedAtMs: number;
+
+  @Column({ name: 'deleted_at_ms', type: 'integer', nullable: true })
+  deletedAtMs: number | null;
 }

@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NetworkGateway } from '../network/network.gateway';
+import { DeleteRaceDto } from './dto/delete-race.dto';
 import { UpsertRaceDto } from './dto/upsert-race.dto';
 import { RaceEntity } from './entities/race.entity';
 import { RacesPresenter } from './races.presenter';
@@ -29,6 +30,13 @@ export class RacesService {
     const now = Date.now();
 
     if (existing) {
+      if (existing.deletedAtMs != null) {
+        throw new ConflictException({
+          message: 'Race has been deleted',
+          current: RacesPresenter.present(existing),
+        });
+      }
+
       if (dto.version != null && dto.version < existing.version) {
         throw new ConflictException({
           message: 'Stale race version',
@@ -56,10 +64,47 @@ export class RacesService {
       version: 1,
       createdAtMs: now,
       updatedAtMs: dto.updated_at_ms ?? now,
+      deletedAtMs: null,
     });
 
     const saved = await this.racesRepository.save(race);
     this.networkGateway.broadcastRaceCreated(RacesPresenter.present(saved));
+    return saved;
+  }
+
+  async removeBySyncId(syncId: string, dto?: DeleteRaceDto): Promise<RaceEntity> {
+    const existing = await this.racesRepository.findOne({
+      where: { syncId },
+    });
+
+    if (!existing) {
+      const now = Date.now();
+      return {
+        syncId,
+        name: '',
+        grades: '{"grades":[]}',
+        serverRaceId: null,
+        createdBy: dto?.created_by?.trim() || '',
+        version: 0,
+        createdAtMs: now,
+        updatedAtMs: now,
+        deletedAtMs: now,
+      };
+    }
+
+    if (existing.deletedAtMs != null) {
+      return existing;
+    }
+
+    const now = Date.now();
+    existing.deletedAtMs = now;
+    existing.updatedAtMs = now;
+    if (dto?.created_by?.trim()) {
+      existing.createdBy = dto.created_by.trim();
+    }
+
+    const saved = await this.racesRepository.save(existing);
+    this.networkGateway.broadcastRaceDeleted(RacesPresenter.present(saved));
     return saved;
   }
 
@@ -68,7 +113,7 @@ export class RacesService {
       where: { syncId: syncId },
     });
 
-    if (!race) {
+    if (!race || race.deletedAtMs != null) {
       throw new NotFoundException('Race not found');
     }
 
