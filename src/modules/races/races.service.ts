@@ -1,12 +1,15 @@
 import {
   BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   NotFoundException,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NetworkGateway } from '../network/network.gateway';
+import { RaceUsersService } from '../race-users/race-users.service';
 import { DeleteRaceDto } from './dto/delete-race.dto';
 import { UpsertRaceDto } from './dto/upsert-race.dto';
 import { RaceEntity } from './entities/race.entity';
@@ -18,6 +21,8 @@ export class RacesService {
     @InjectRepository(RaceEntity)
     private readonly racesRepository: Repository<RaceEntity>,
     private readonly networkGateway: NetworkGateway,
+    @Inject(forwardRef(() => RaceUsersService))
+    private readonly raceUsersService: RaceUsersService,
   ) {}
 
   async upsert(dto: UpsertRaceDto) {
@@ -47,6 +52,7 @@ export class RacesService {
       existing.name = dto.name.trim();
       existing.grades = dto.grades;
       existing.serverRaceId = dto.server_race_id ?? existing.serverRaceId;
+      existing.createdBy = dto.created_by;
       existing.version = existing.version + 1;
       existing.updatedAtMs = dto.updated_at_ms ?? now;
 
@@ -104,6 +110,10 @@ export class RacesService {
     }
 
     const saved = await this.racesRepository.save(existing);
+    await this.raceUsersService.removeAllByRaceSyncId(
+      syncId,
+      dto?.created_by?.trim(),
+    );
     this.networkGateway.broadcastRaceDeleted(RacesPresenter.present(saved));
     return saved;
   }

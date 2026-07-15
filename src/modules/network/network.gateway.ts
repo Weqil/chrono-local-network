@@ -22,7 +22,13 @@ import {
   SYNC_RACE_DELETED_EVENT,
   SYNC_RACE_UPDATED_EVENT,
 } from '../races/constants';
+import {
+  SYNC_RACE_USER_CREATED_EVENT,
+  SYNC_RACE_USER_DELETED_EVENT,
+  SYNC_RACE_USER_UPDATED_EVENT,
+} from '../race-users/constants';
 import { RaceSyncPayload } from '../races/interfaces/race-sync-payload.interface';
+import { RaceUserSyncPayload } from '../race-users/interfaces/race-user-sync-payload.interface';
 import { RACE_RESULTS_STREAM_ROOM } from './constants';
 
 @WebSocketGateway({
@@ -86,6 +92,18 @@ export class NetworkGateway
 
   broadcastRaceDeleted(payload: RaceSyncPayload) {
     this.server.to(SYNC_GLOBAL_ROOM).emit(SYNC_RACE_DELETED_EVENT, payload);
+  }
+
+  broadcastRaceUserCreated(payload: RaceUserSyncPayload) {
+    this.server.to(SYNC_GLOBAL_ROOM).emit(SYNC_RACE_USER_CREATED_EVENT, payload);
+  }
+
+  broadcastRaceUserUpdated(payload: RaceUserSyncPayload) {
+    this.server.to(SYNC_GLOBAL_ROOM).emit(SYNC_RACE_USER_UPDATED_EVENT, payload);
+  }
+
+  broadcastRaceUserDeleted(payload: RaceUserSyncPayload) {
+    this.server.to(SYNC_GLOBAL_ROOM).emit(SYNC_RACE_USER_DELETED_EVENT, payload);
   }
 
   @SubscribeMessage('ping')

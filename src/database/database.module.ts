@@ -5,6 +5,7 @@ import { ArrivalResultEntity } from '../modules/final-results/entities/arrival-r
 import { ArrivalResultLapEntity } from '../modules/final-results/entities/arrival-result-lap.entity';
 import { LiveResultSnapshotEntity } from '../modules/race-results/entities/live-result-snapshot.entity';
 import { RaceEntity } from '../modules/races/entities/race.entity';
+import { RaceUserEntity } from '../modules/race-users/entities/race-user.entity';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { RaceEntity } from '../modules/races/entities/race.entity';
         ArrivalResultLapEntity,
         LiveResultSnapshotEntity,
         RaceEntity,
+        RaceUserEntity,
       ],
       synchronize: true,
     }),
