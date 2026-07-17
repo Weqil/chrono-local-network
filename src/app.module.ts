@@ -7,6 +7,7 @@ import { NetworkModule } from './modules/network/network.module';
 import { RaceResultsModule } from './modules/race-results/race-results.module';
 import { RaceUsersModule } from './modules/race-users/race-users.module';
 import { RacesModule } from './modules/races/races.module';
+import { SyncArrivalsModule } from './modules/sync-arrivals/sync-arrivals.module';
 import { StatusModule } from './modules/status/status.module';
 
 @Module({
@@ -17,6 +18,7 @@ import { StatusModule } from './modules/status/status.module';
     FinalResultsModule,
     RacesModule,
     RaceUsersModule,
+    SyncArrivalsModule,
     StatusModule,
   ],
   controllers: [AppController],

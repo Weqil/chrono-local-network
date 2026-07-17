@@ -6,6 +6,9 @@ import { ArrivalResultLapEntity } from '../modules/final-results/entities/arriva
 import { LiveResultSnapshotEntity } from '../modules/race-results/entities/live-result-snapshot.entity';
 import { RaceEntity } from '../modules/races/entities/race.entity';
 import { RaceUserEntity } from '../modules/race-users/entities/race-user.entity';
+import { SyncArrivalEntity } from '../modules/sync-arrivals/entities/sync-arrival.entity';
+import { SyncArrivalResultEntity } from '../modules/sync-arrivals/entities/sync-arrival-result.entity';
+import { SyncArrivalResultLapEntity } from '../modules/sync-arrivals/entities/sync-arrival-result-lap.entity';
 
 @Module({
   imports: [
@@ -19,6 +22,9 @@ import { RaceUserEntity } from '../modules/race-users/entities/race-user.entity'
         LiveResultSnapshotEntity,
         RaceEntity,
         RaceUserEntity,
+        SyncArrivalEntity,
+        SyncArrivalResultEntity,
+        SyncArrivalResultLapEntity,
       ],
       synchronize: true,
     }),
