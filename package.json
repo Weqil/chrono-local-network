@@ -21,7 +21,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:ws": "ts-node scripts/ws-test.ts",
     "test:ws:stream": "ts-node scripts/ws-stream-test.ts",
-    "test:ws:sync": "ts-node scripts/ws-sync-test.ts"
+    "test:ws:sync": "ts-node scripts/ws-sync-test.ts",
+    "docker:build": "docker build -t weqil/chrono-local-network:latest .",
+    "docker:push": "bash scripts/docker-push.sh"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

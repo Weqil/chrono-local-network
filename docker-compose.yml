@@ -1,0 +1,18 @@
+services:
+  chrono-local-network:
+    build: .
+    image: weqil/chrono-local-network:latest
+    container_name: chrono-local-network
+    ports:
+      - '3000:3000'
+    environment:
+      PORT: 3000
+      HOST: 0.0.0.0
+      DATABASE_PATH: /app/data/chrono.sqlite
+      # API_SECRET: your-secret
+    volumes:
+      - chrono-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  chrono-data:
