@@ -5,6 +5,7 @@ export class ArrivalMetaDto {
   arrival_type_id?: number | null;
   arrival_type_slug?: string | null;
   arrival_name?: string | null;
+  finish_lap_number?: number | null;
 }
 
 export class ParticipantDataDto {
@@ -15,16 +16,21 @@ export class ParticipantDataDto {
   start_number: number;
 }
 
+export type ParticipantLiveStatusDto = 'pending' | 'finished';
+
 export class ParticipantResultDto {
   id: number;
   lapCount: number;
   lastLapTimestampMs: number;
   totalRaceTimeMs: number;
   position: number;
+  position_delta?: number | null;
   displayTimeMs: number;
   laps_behind: number;
   bestLapTimeMs?: number | null;
   lastLapDeltaSec?: number | null;
+  status?: ParticipantLiveStatusDto;
+  finishElapsedMs?: number | null;
   participantData: ParticipantDataDto;
 }
 
